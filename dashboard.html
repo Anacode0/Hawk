@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIEM Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0f1419;
+            color: #e1e8ed;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: #1a1f2e;
+            padding: 1.5rem 2rem;
+            border-bottom: 2px solid #2d3748;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            color: #4a9eff;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .header p {
+            color: #8899a6;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: #1a1f2e;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #2d3748;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: #8899a6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4a9eff;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #657786;
+        }
+
+        .severity-critical { color: #e0245e; }
+        .severity-high { color: #ff6b35; }
+        .severity-medium { color: #ffb700; }
+        .severity-low { color: #17bf63; }
+
+        .section {
+            background: #1a1f2e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #2d3748;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #2d3748;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #4a9eff;
+        }
+
+        .refresh-btn {
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: #357abd;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #0f1419;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #8899a6;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 0.75rem;
+            border-top: 1px solid #2d3748;
+            font-size: 0.9rem;
+        }
+
+        tr:hover {
+            background: #252d3d;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-critical {
+            background: #e0245e;
+            color: white;
+        }
+
+        .badge-high {
+            background: #ff6b35;
+            color: white;
+        }
+
+        .badge-medium {
+            background: #ffb700;
+            color: #0f1419;
+        }
+
+        .badge-low {
+            background: #17bf63;
+            color: white;
+        }
+
+        .badge-new {
+            background: #1da1f2;
+            color: white;
+        }
+
+        .badge-investigating {
+            background: #ffb700;
+            color: #0f1419;
+        }
+
+        .badge-resolved {
+            background: #17bf63;
+            color: white;
+        }
+
+        .timestamp {
+            color: #8899a6;
+            font-size: 0.85rem;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 0.75rem;
+            background: #0f1419;
+            border: 1px solid #2d3748;
+            border-radius: 5px;
+            color: #e1e8ed;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: #657786;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #4a9eff;
+        }
+
+        code {
+            background: #0f1419;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            color: #4a9eff;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>SIEM Dashboard</h1>
+        <p>Security Information and Event Management System</p>
+    </div>
+
+    <div class="container">
+        <div class="stats-grid" id="statsGrid">
+            <div class="loading">Loading statistics...</div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Active Alerts</h2>
+                <button class="refresh-btn" onclick="loadAlerts()">Refresh</button>
+            </div>
+            <div id="alertsTable">
+                <div class="loading">Loading alerts...</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2 class="section-title">Recent Logs</h2>
+                <button class="refresh-btn" onclick="loadLogs()">Refresh</button>
+            </div>
+            <input type="text" class="search-box" id="searchBox" placeholder="Search logs..." onkeyup="searchLogs()">
+            <div id="logsTable">
+                <div class="loading">Loading logs...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/api/statistics');
+                const stats = await response.json();
+
+                let html = '';
+
+                html += `
+                    <div class="stat-card">
+                        <h3>Total Events</h3>
+                        <div class="stat-value">${stats.total_logs}</div>
+                        <div class="stat-label">Last 24 hours</div>
+                    </div>
+                `;
+
+                html += `
+                    <div class="stat-card">
+                        <h3>New Alerts</h3>
+                        <div class="stat-value severity-high">${stats.new_alerts || 0}</div>
+                        <div class="stat-label">Requires attention</div>
+                    </div>
+                `;
+
+                const alertsBySeverity = stats.alerts_by_severity || {};
+                const criticalAlerts = alertsBySeverity.critical || 0;
+                const highAlerts = alertsBySeverity.high || 0;
+
+                html += `
+                    <div class="stat-card">
+                        <h3>High Priority</h3>
+                        <div class="stat-value severity-critical">${criticalAlerts + highAlerts}</div>
+                        <div class="stat-label">Critical + High severity</div>
+                    </div>
+                `;
+
+                const logsByCategory = stats.logs_by_category || {};
+                const topCategory = Object.keys(logsByCategory).sort((a, b) =>
+                    logsByCategory[b] - logsByCategory[a]
+                )[0] || 'N/A';
+
+                html += `
+                    <div class="stat-card">
+                        <h3>Top Event Type</h3>
+                        <div class="stat-value" style="font-size: 1.2rem;">${topCategory}</div>
+                        <div class="stat-label">${logsByCategory[topCategory] || 0} events</div>
+                    </div>
+                `;
+
+                document.getElementById('statsGrid').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+                document.getElementById('statsGrid').innerHTML = '<div class="no-data">Error loading statistics</div>';
+            }
+        }
+
+        async function loadAlerts() {
+            try {
+                const response = await fetch('/api/alerts?status=new&limit=50');
+                const alerts = await response.json();
+
+                if (alerts.length === 0) {
+                    document.getElementById('alertsTable').innerHTML = '<div class="no-data">No active alerts</div>';
+                    return;
+                }
+
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Severity</th>
+                                <th>Title</th>
+                                <th>Timestamp</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                alerts.forEach(alert => {
+                    const timestamp = new Date(alert.timestamp).toLocaleString();
+                    html += `
+                        <tr>
+                            <td><span class="badge badge-${alert.severity}">${alert.severity}</span></td>
+                            <td>${alert.title}</td>
+                            <td class="timestamp">${timestamp}</td>
+                            <td><span class="badge badge-${alert.status}">${alert.status}</span></td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table>';
+                document.getElementById('alertsTable').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading alerts:', error);
+                document.getElementById('alertsTable').innerHTML = '<div class="no-data">Error loading alerts</div>';
+            }
+        }
+
+        async function loadLogs() {
+            try {
+                const response = await fetch('/api/logs?limit=50');
+                const logs = await response.json();
+
+                if (logs.length === 0) {
+                    document.getElementById('logsTable').innerHTML = '<div class="no-data">No logs available</div>';
+                    return;
+                }
+
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Source</th>
+                                <th>Event Type</th>
+                                <th>Severity</th>
+                                <th>Message</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                logs.forEach(log => {
+                    const timestamp = new Date(log.timestamp).toLocaleString();
+                    const eventType = log.event_type || 'unknown';
+                    const severity = log.event_severity || 'low';
+                    html += `
+                        <tr>
+                            <td class="timestamp">${timestamp}</td>
+                            <td><code>${log.source_ip}</code></td>
+                            <td>${eventType}</td>
+                            <td><span class="badge badge-${severity}">${severity}</span></td>
+                            <td>${log.message.substring(0, 100)}${log.message.length > 100 ? '...' : ''}</td>
+                        </tr>
+                    `;
+                });
+
+                html += '</tbody></table>';
+                document.getElementById('logsTable').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading logs:', error);
+                document.getElementById('logsTable').innerHTML = '<div class="no-data">Error loading logs</div>';
+            }
+        }
+
+        let searchTimeout;
+        async function searchLogs() {
+            clearTimeout(searchTimeout);
+            const query = document.getElementById('searchBox').value;
+
+            if (!query) {
+                loadLogs();
+                return;
+            }
+
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&limit=50`);
+                    const logs = await response.json();
+
+                    if (logs.length === 0) {
+                        document.getElementById('logsTable').innerHTML = '<div class="no-data">No results found</div>';
+                        return;
+                    }
+
+                    let html = `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Source</th>
+                                    <th>Event Type</th>
+                                    <th>Severity</th>
+                                    <th>Message</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    logs.forEach(log => {
+                        const timestamp = new Date(log.timestamp).toLocaleString();
+                        const eventType = log.event_type || 'unknown';
+                        const severity = log.event_severity || 'low';
+                        html += `
+                            <tr>
+                                <td class="timestamp">${timestamp}</td>
+                                <td><code>${log.source_ip}</code></td>
+                                <td>${eventType}</td>
+                                <td><span class="badge badge-${severity}">${severity}</span></td>
+                                <td>${log.message}</td>
+                            </tr>
+                        `;
+                    });
+
+                    html += '</tbody></table>';
+                    document.getElementById('logsTable').innerHTML = html;
+                } catch (error) {
+                    console.error('Error searching logs:', error);
+                }
+            }, 300);
+        }
+
+        function autoRefresh() {
+            loadStatistics();
+            loadAlerts();
+            loadLogs();
+        }
+
+        autoRefresh();
+
+        setInterval(autoRefresh, 30000);
+    </script>
+</body>
+</html>
