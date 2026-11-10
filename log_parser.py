@@ -11,10 +11,6 @@ from typing import Dict, List, Optional
 
 
 class LogParser:
-    """
-    Parse network device logs and extract security events
-    """
-
     def __init__(self):
         self.patterns = {
             'firewall_block': {
@@ -68,15 +64,6 @@ class LogParser:
         }
 
     def parse(self, log_entry: Dict) -> Optional[Dict]:
-        """
-        Parse a log entry and extract security events
-
-        Args:
-            log_entry: Dictionary containing parsed syslog data
-
-        Returns:
-            Enhanced log entry with extracted security information, or None
-        """
         message = log_entry.get('message', '')
 
         for event_name, pattern_config in self.patterns.items():
@@ -110,10 +97,6 @@ class LogParser:
 
 
 class LogAnalyzer:
-    """
-    Analyze parsed logs for security threats
-    """
-
     def __init__(self):
         self.auth_failure_threshold = 5  # Failed attempts before alert
         self.port_scan_threshold = 10     # Unique ports before alert
@@ -121,12 +104,6 @@ class LogAnalyzer:
         self.port_access_counts = {}
 
     def analyze(self, log_entry: Dict) -> List[Dict]:
-        """
-        Analyze log entry and return any alerts
-
-        Returns:
-            List of alert dictionaries
-        """
         alerts = []
         event_category = log_entry.get('event_category', '')
 
@@ -146,7 +123,6 @@ class LogAnalyzer:
         return alerts
 
     def _check_brute_force(self, log_entry: Dict) -> List[Dict]:
-        """Check for brute force authentication attempts"""
         alerts = []
         extracted = log_entry.get('extracted_fields', {})
         username = extracted.get('username', 'unknown')
