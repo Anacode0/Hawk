@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-SIEM Log Collector - Syslog Server
-Receives syslog messages from network devices and firewalls
-"""
 
 import socketserver
 import json
@@ -12,16 +8,12 @@ from pathlib import Path
 
 
 class SyslogHandler(socketserver.BaseRequestHandler):
-    """
-    Handler for incoming syslog messages (UDP)
-    """
 
     def handle(self):
         data = self.request[0].strip()
         socket = self.request[1]
         client_ip = self.client_address[0]
 
-        # Decode the syslog message
         try:
             message = data.decode('utf-8')
         except UnicodeDecodeError:
@@ -30,13 +22,9 @@ class SyslogHandler(socketserver.BaseRequestHandler):
         parsed_log = self.parse_syslog(message, client_ip)
         self.store_log(parsed_log)
 
-        # Print to console for monitoring
         print(f"[{parsed_log['timestamp']}] {client_ip}: {parsed_log['message']}")
 
     def parse_syslog(self, raw_message, source_ip):
-        """
-        Parse syslog message following RFC 3164/5424
-        """
         syslog_pattern = r'^<(\d+)>(\w+\s+\d+\s+\d+:\d+:\d+)\s+(\S+)\s+(.*)$'
         match = re.match(syslog_pattern, raw_message)
 
@@ -76,7 +64,6 @@ class SyslogHandler(socketserver.BaseRequestHandler):
             7: "Debug"
         }
 
-        # Facility mapping (common ones)
         facility_map = {
             0: "kernel",
             1: "user",
