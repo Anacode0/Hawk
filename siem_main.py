@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-SIEM Main Application
-Integrates log collection, parsing, analysis, and storage
-"""
 
 import socketserver
 import threading
@@ -15,10 +11,6 @@ from siem_database import SIEMDatabase
 
 
 class IntegratedSyslogHandler(socketserver.BaseRequestHandler):
-    """
-    Enhanced syslog handler with integrated parsing and analysis
-    """
-
     parser = LogParser()
     analyzer = LogAnalyzer()
     db = SIEMDatabase()
@@ -61,7 +53,6 @@ class IntegratedSyslogHandler(socketserver.BaseRequestHandler):
               f"{client_ip} | {event_type} | {enhanced_log['message'][:80]}")
 
     def parse_syslog(self, raw_message, source_ip):
-        """Parse syslog message (same as before)"""
         import re
 
         syslog_pattern = r'^<(\d+)>(\w+\s+\d+\s+\d+:\d+:\d+)\s+(\S+)\s+(.*)$'
@@ -116,10 +107,6 @@ class IntegratedSyslogHandler(socketserver.BaseRequestHandler):
 
 
 class SIEMApplication:
-    """
-    Main SIEM application
-    """
-
     def __init__(self, syslog_host='0.0.0.0', syslog_port=5140,
                  web_host='0.0.0.0', web_port=5000):
         self.syslog_host = syslog_host
@@ -130,7 +117,6 @@ class SIEMApplication:
         self.web_thread = None
 
     def start_syslog_server(self):
-        """Start the syslog collection server"""
         print(f"Starting Syslog Collector on {self.syslog_host}:{self.syslog_port}")
         try:
             self.syslog_server = socketserver.UDPServer(
@@ -142,14 +128,12 @@ class SIEMApplication:
             print(f"Error starting syslog server: {e}")
 
     def start_web_dashboard(self):
-        """Start the web dashboard in a separate thread"""
         from dashboard import app
 
         print(f"Starting Web Dashboard on http://{self.web_host}:{self.web_port}")
         app.run(host=self.web_host, port=self.web_port, debug=False, use_reloader=False)
 
     def start(self):
-        """Start both syslog server and web dashboard"""
         print("=" * 60)
         print("SIEM System Starting")
         print("=" * 60)
