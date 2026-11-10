@@ -1,10 +1,8 @@
 #!/bin/bash
-# Quick Start Script for Custom SIEM
 
 echo "   Custom SIEM System - Quick Start"
 echo
 
-# Check Python version
 echo "Checking Python version..."
 python3 --version
 if [ $? -ne 0 ]; then
@@ -14,7 +12,6 @@ fi
 echo "✓ Python 3 found"
 echo
 
-# Check/install Flask
 echo "Checking Flask installation..."
 python3 -c "import flask" 2>/dev/null
 if [ $? -ne 0 ]; then
@@ -29,20 +26,17 @@ fi
 echo "✓ Flask installed"
 echo
 
-# Make scripts executable
 echo "Setting permissions..."
 chmod +x *.py
 echo "✓ Scripts are executable"
 echo
 
-# Create necessary directories
 echo "Creating directories..."
 mkdir -p logs
 mkdir -p templates
 echo "✓ Directories created"
 echo
 
-# Initialize database
 echo "Initializing database..."
 python3 -c "from siem_database import SIEMDatabase; db = Database(); db.close()"
 if [ $? -eq 0 ]; then
