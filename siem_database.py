@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-SIEM Database Storage Module
-Handles storage and retrieval of logs and alerts
-"""
 
 import sqlite3
 import json
@@ -12,10 +8,6 @@ from typing import List, Dict, Optional
 
 
 class SIEMDatabase:
-    """
-    SQLite database for SIEM data storage
-    In production, you'd use PostgreSQL, Elasticsearch, or similar
-    """
 
     def __init__(self, db_path: str = "siem.db"):
         self.db_path = db_path
@@ -25,7 +17,7 @@ class SIEMDatabase:
     def init_database(self):
         """Initialize database schema"""
         self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
-        self.conn.row_factory = sqlite3.Row  # Return rows as dictionaries
+        self.conn.row_factory = sqlite3.Row
         cursor = self.conn.cursor()
 
         cursor.execute('''
@@ -97,12 +89,6 @@ class SIEMDatabase:
         self.conn.commit()
 
     def store_log(self, log_entry: Dict) -> int:
-        """
-        Store a log entry in the database
-
-        Returns:
-            Log ID
-        """
         cursor = self.conn.cursor()
 
         extracted_fields_json = json.dumps(log_entry.get('extracted_fields', {}))
@@ -132,12 +118,6 @@ class SIEMDatabase:
         return cursor.lastrowid
 
     def store_alert(self, alert: Dict, source_log_id: int = None) -> int:
-        """
-        Store an alert in the database
-
-        Returns:
-            Alert ID
-        """
         cursor = self.conn.cursor()
 
         extra_data_json = json.dumps(alert.get('extra_data', {}))
@@ -213,15 +193,6 @@ class SIEMDatabase:
         self.conn.commit()
 
     def get_statistics(self, hours: int = 24) -> Dict:
-        """
-        Get statistics for the dashboard
-
-        Args:
-            hours: Number of hours to look back
-
-        Returns:
-            Dictionary with various statistics
-        """
         cursor = self.conn.cursor()
         cutoff = (datetime.now() - timedelta(hours=hours)).isoformat()
 
@@ -277,16 +248,6 @@ class SIEMDatabase:
         }
 
     def search_logs(self, query: str, limit: int = 100) -> List[Dict]:
-        """
-        Simple text search in logs
-
-        Args:
-            query: Search string
-            limit: Maximum results
-
-        Returns:
-            List of matching log entries
-        """
         cursor = self.conn.cursor()
 
         search_pattern = f"%{query}%"
@@ -306,7 +267,7 @@ class SIEMDatabase:
 
 
 if __name__ == "__main__":
-    # Example usage
+    # Example
     db = SIEMDatabase()
 
     sample_log = {
